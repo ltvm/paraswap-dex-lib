@@ -54,7 +54,7 @@ export type KsElasticSellParam = {
   recipient: Address;
   deadline: number;
   amountIn: NumberAsString;
-  amountOutMinimum: NumberAsString;
+  minAmountOut: NumberAsString;
 };
 
 export type KsElasticBuyParam = {
@@ -62,7 +62,7 @@ export type KsElasticBuyParam = {
   recipient: Address;
   deadline: number;
   amountOut: NumberAsString;
-  amountInMaximum: NumberAsString;
+  maxAmountIn: NumberAsString;
 };
 
 export type KsElasticParam = KsElasticSellParam | KsElasticBuyParam;

@@ -30,7 +30,7 @@ import {
 import { SimpleExchange } from '../simple-exchange';
 import { KsElasticConfig, Adapters, PoolsToPreload } from './config';
 import { KsElasticEventPool } from './ks-elastic-pool';
-import KsElasticRouterABI from '../../abi/ks-elastic/IProAmmRouter.json';
+import KsElasticRouterABI from '../../abi/ks-elastic/Router.json';
 
 import {
   KS_ELASTIC_EFFICIENCY_FACTOR,
@@ -371,14 +371,14 @@ export class KsElastic
             recipient: this.augustusAddress,
             deadline: this.getDeadline(),
             amountIn: srcAmount,
-            amountOutMinimum: destAmount,
+            minAmountOut: destAmount,
             path,
           }
         : {
             recipient: this.augustusAddress,
             deadline: this.getDeadline(),
             amountOut: destAmount,
-            amountInMaximum: srcAmount,
+            maxAmountIn: srcAmount,
             path,
           };
     const swapData = this.routerIface.encodeFunctionData(swapFunction, [
@@ -398,80 +398,7 @@ export class KsElastic
     tokenAddress: Address,
     limit: number,
   ): Promise<PoolLiquidity[]> {
-    const _tokenAddress = tokenAddress.toLowerCase();
-
-    const res = await this._querySubgraph(
-      `query ($token: Bytes!, $count: Int) {
-                pools0: pools(first: $count, orderBy: totalValueLockedUSD, orderDirection: desc, where: {token0: $token}) {
-                id
-                token0 {
-                  id
-                  decimals
-                }
-                token1 {
-                  id
-                  decimals
-                }
-                totalValueLockedUSD
-              }
-              pools1: pools(first: $count, orderBy: totalValueLockedUSD, orderDirection: desc, where: {token1: $token}) {
-                id
-                token0 {
-                  id
-                  decimals
-                }
-                token1 {
-                  id
-                  decimals
-                }
-                totalValueLockedUSD
-              }
-            }`,
-      {
-        token: _tokenAddress,
-        count: limit,
-      },
-    );
-
-    if (!(res && res.pools0 && res.pools1)) {
-      this.logger.error(
-        `Error_${this.dexKey}_Subgraph: couldn't fetch the pools from the subgraph`,
-      );
-      return [];
-    }
-
-    const pools0 = _.map(res.pools0, pool => ({
-      exchange: this.dexKey,
-      address: pool.id.toLowerCase(),
-      connectorTokens: [
-        {
-          address: pool.token1.id.toLowerCase(),
-          decimals: parseInt(pool.token1.decimals),
-        },
-      ],
-      liquidityUSD:
-        parseFloat(pool.totalValueLockedUSD) * KS_ELASTIC_EFFICIENCY_FACTOR,
-    }));
-
-    const pools1 = _.map(res.pools1, pool => ({
-      exchange: this.dexKey,
-      address: pool.id.toLowerCase(),
-      connectorTokens: [
-        {
-          address: pool.token0.id.toLowerCase(),
-          decimals: parseInt(pool.token0.decimals),
-        },
-      ],
-      liquidityUSD:
-        parseFloat(pool.totalValueLockedUSD) * KS_ELASTIC_EFFICIENCY_FACTOR,
-    }));
-
-    const pools = _.slice(
-      _.sortBy(_.concat(pools0, pools1), [pool => -1 * pool.liquidityUSD]),
-      0,
-      limit,
-    );
-    return pools;
+    return [];
   }
 
   private async _getPoolsFromIdentifiers(

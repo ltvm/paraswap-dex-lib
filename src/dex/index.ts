@@ -31,7 +31,7 @@ import { DodoV2 } from './dodo-v2';
 import { Smoothy } from './smoothy';
 import { Nerve } from './nerve/nerve';
 import { IDexHelper } from '../dex-helper';
-import { SwapSide, Network } from '../constants';
+import { SwapSide } from '../constants';
 import { Adapters } from '../types';
 import { Lido } from './lido';
 import { Excalibur } from './uniswap-v2/excalibur';
@@ -48,6 +48,8 @@ import Web3 from 'web3';
 import { Solidly } from './solidly/solidly';
 import { Velodrome } from './solidly/forks-override/velodrome';
 import { SpiritSwapV2 } from './solidly/forks-override/spiritSwapV2';
+import { Synthetix } from './synthetix/synthetix';
+import { Cone } from './solidly/forks-override/cone';
 
 const LegacyDexes = [
   Curve,
@@ -93,13 +95,14 @@ const Dexes = [
   SpiritSwapV2,
   Velodrome,
   KsElastic,
+  Cone,
+  Synthetix,
 ];
 
 export type LegacyDexConstructor = new (
   augustusAddress: Address,
   network: number,
   provider: Web3,
-  dexHelper?: IDexHelper,
 ) => IDexTxBuilder<any, any>;
 
 interface IGetDirectFunctionName {
@@ -202,9 +205,6 @@ export class DexAdapterService {
         this.dexHelper.config.data.augustusAddress,
         this.network,
         this.dexHelper.web3Provider,
-        // Temporary addition before moving to dex-lib
-        // TODO: Remove this line after SpiritSwap migration
-        this.dexHelper,
       );
     }
 

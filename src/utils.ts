@@ -1,6 +1,6 @@
 import { BI_POWS } from './bigint-constants';
 import { ETHER_ADDRESS, Network } from './constants';
-import { Address, Token, DexConfigMap } from './types';
+import { DexConfigMap, Address, Token } from './types';
 
 export const WethMap: { [network: number]: Address } = {
   1: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
@@ -72,8 +72,32 @@ export function getBigIntPow(decimals: number): bigint {
   return value === undefined ? BigInt(`1${'0'.repeat(decimals)}`) : value;
 }
 
-export const _require = (b: boolean, message: string) => {
-  if (!b) throw new Error(message);
-};
+export function _require(
+  b: boolean,
+  message: string,
+  values?: Record<string, unknown>,
+  condition?: string,
+): void {
+  let receivedValues = '';
+  if (values && condition) {
+    const keyValueStr = Object.entries(values)
+      .map(([k, v]) => `${k}=${stringifyWithBigInt(v)}`)
+      .join(', ');
+    receivedValues = `Values: ${keyValueStr}. Condition: ${condition} violated. `;
+  }
+  if (!b)
+    throw new Error(
+      `${receivedValues}Error message: ${message ? message : 'undefined'}`,
+    );
+}
 
 export const bigIntify = (val: any) => BigInt(val);
+
+export function stringifyWithBigInt(obj: unknown): string {
+  return typeof obj === 'object'
+    ? JSON.stringify(
+        obj,
+        (key, value) => (typeof value === 'bigint' ? value.toString() : value), // return everything else unchanged
+      )
+    : '';
+}

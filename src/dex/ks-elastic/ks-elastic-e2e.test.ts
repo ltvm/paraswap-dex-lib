@@ -73,18 +73,21 @@ describe('KsElastic E2E', () => {
     const nativeTokenAmount = '11000000000000000000';
 
     const sideToContractMethods = new Map([
-      // [SwapSide.SELL, [
-      //   ContractMethod.simpleSwap,
-      //   // ContractMethod.multiSwap,
-      //   // ContractMethod.megaSwap,
-      // ]],
       [
-        SwapSide.BUY,
+        SwapSide.SELL,
         [
-          ContractMethod.simpleBuy,
-          // ContractMethod.buy
+          ContractMethod.simpleSwap,
+          // ContractMethod.multiSwap,
+          // ContractMethod.megaSwap,
         ],
       ],
+      // [
+      //   SwapSide.BUY,
+      //   [
+      //     ContractMethod.simpleBuy,
+      //     // ContractMethod.buy
+      //   ],
+      // ],
     ]);
 
     sideToContractMethods.forEach((contractMethods, side) =>

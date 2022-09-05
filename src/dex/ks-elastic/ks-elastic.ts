@@ -92,7 +92,7 @@ export class KsElastic
 
   async initializePricing(blockNumber: number) {
     // This is only for testing, because cold pool fetching is goes out of
-    // FETCH_POOL_INDENTIFIER_TIMEOUT range
+    // FETCH_POOL_IDENTIFIER_TIMEOUT range
     await Promise.all(
       this.poolsToPreload.map(async pool =>
         Promise.all(
@@ -136,7 +136,6 @@ export class KsElastic
         newState = await pool.generateState(blockNumber);
 
         pool.setState(newState, blockNumber);
-
         this.dexHelper.blockManager.subscribeToLogs(
           pool,
           pool.addressesSubscribed,
@@ -237,7 +236,6 @@ export class KsElastic
           0n,
           // Trim from 0 fee postfix, so it become comparable
         ).slice(0, -1);
-        console.log('pairIdentifierWithoutFee', pairIdentifierWithoutFee);
         selectedPools = await this._getPoolsFromIdentifiers(
           limitPools.filter(identifier =>
             identifier.startsWith(pairIdentifierWithoutFee),
@@ -245,36 +243,7 @@ export class KsElastic
           blockNumber,
         );
       }
-
-      console.log('selectedPools', selectedPools);
-
       if (selectedPools.length === 0) return null;
-      // const states = await Promise.all(
-      //   selectedPools.map((pool) => {
-      //     return new Promise<PoolState>(async (resolve) => {
-      //       let state = pool.getState(blockNumber);
-      //       console.log("1233333 state",state)
-
-      //       if (state === null || !state.isValid) {
-      //         if (state === null) {
-      //           this.logger.trace(
-      //             `${this.dexKey}: State === null. Generating new one`,
-      //           );
-      //         } else if (!state.isValid) {
-      //           this.logger.trace(
-      //             `${this.dexKey}: State is invalid. Generating new one`,
-      //           );
-      //         }
-
-      //         state = await pool.generateState(blockNumber);
-      //         console.log("selectedPools.length === 0", state)
-      //         pool.setState(state, blockNumber);
-      //       }
-      //       console.log("resolve 1233333444", state)
-      //       resolve(state);
-      //     })
-      //   })
-      // )
       const states = await Promise.all(
         selectedPools.map(async pool => {
           let state = pool.getState(blockNumber);
@@ -288,16 +257,12 @@ export class KsElastic
                 `${this.dexKey}: State is invalid. Generating new one`,
               );
             }
-            console.log('generate state', blockNumber);
-
             state = await pool.generateState(blockNumber);
             pool.setState(state, blockNumber);
           }
           return state;
         }),
       );
-      console.log('get states', states);
-
       const unitAmount = getBigIntPow(
         side == SwapSide.SELL ? _srcToken.decimals : _destToken.decimals,
       );
@@ -344,8 +309,6 @@ export class KsElastic
           };
         }),
       );
-      console.log('result ==================', result);
-
       return result;
     } catch (e) {
       this.logger.error(
@@ -381,7 +344,6 @@ export class KsElastic
         deadline: this.getDeadline(),
       },
     );
-    console.log('toang toang fc');
     return {
       targetExchange: this.config.router,
       payload,
@@ -422,7 +384,6 @@ export class KsElastic
     const swapData = this.routerIface.encodeFunctionData(swapFunction, [
       swapFunctionParams,
     ]);
-    console.log('swapData', swapData);
     return this.buildSimpleParamWithoutWETHConversion(
       srcToken,
       srcAmount,

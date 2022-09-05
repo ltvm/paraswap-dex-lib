@@ -1,4 +1,4 @@
-import _, { chunk, filter } from 'lodash';
+import _, { filter } from 'lodash';
 import { Contract } from 'web3-eth-contract';
 import { AbiItem } from 'web3-utils';
 import { Interface } from '@ethersproject/abi';
@@ -49,9 +49,9 @@ export class KsElasticEventPool extends StatefulEventSubscriber<PoolState> {
 
   private _poolAddress?: Address;
 
-  readonly tickReader: Contract;
+  tickReader: Contract;
   private poolContract: Contract;
-  readonly poolFactoryContract: Contract;
+  poolFactoryContract: Contract;
   readonly multiCallContract: Contract;
   private isSetPoolContract: boolean | false;
 
@@ -165,7 +165,6 @@ export class KsElasticEventPool extends StatefulEventSubscriber<PoolState> {
     multiCallTickResult.forEach((element, index) => {
       result[index] = this.poolIface.decodeFunctionResult('ticks', element);
     });
-    console.log('decodeMultiCallResult---');
     return result;
   }
 
@@ -241,8 +240,6 @@ export class KsElasticEventPool extends StatefulEventSubscriber<PoolState> {
   }
 
   async getTickInfoFromContract(ticks: number[]) {
-    console.log('getTickInfoFromContract````');
-
     const multiCallResult = (
       await this.multiCallContract.methods
         .aggregate(this.generateMultiCallInput(ticks))
@@ -251,12 +248,19 @@ export class KsElasticEventPool extends StatefulEventSubscriber<PoolState> {
     return this.decodeMultiCallResult(multiCallResult);
   }
 
-  // async getAllTickInfoFromContract(ticks: number[]) {
-  //   if (ticks.length < 100) {
-  //       return this.getAllTickInfoFromContract(ticks)
-  //   }
-  //   chunk
-  // }
+  async getAllTickInfoFromContract(ticks: number[]): Promise<TickInfo[]> {
+    if (ticks.length < 500) {
+      return this.getTickInfoFromContract(ticks);
+    }
+    const slicedTicks = _.chunk(ticks, 500);
+    return (
+      await Promise.all(
+        slicedTicks.map(async tickChunk =>
+          this.getTickInfoFromContract(tickChunk),
+        ),
+      )
+    ).flat();
+  }
 
   setTickList(
     tickList: Array<TickInfo>,
@@ -281,7 +285,6 @@ export class KsElasticEventPool extends StatefulEventSubscriber<PoolState> {
   }
 
   async generateState(blockNumber: number): Promise<Readonly<PoolState>> {
-    console.log('generateState`````1111');
     // TODO: Should be handle it first before processing other logics
     // Cache pool contract for next process
     if (!this.isSetPoolContract) {
@@ -300,9 +303,6 @@ export class KsElasticEventPool extends StatefulEventSubscriber<PoolState> {
     const ticks = {};
     const newTicks = filter(_ticks, tick => tick != 0);
     const tickInfosFromContract = await this.getTickInfoFromContract(newTicks);
-
-    console.log('tickInfosFromContract`````success');
-
     this.setTicksMapping(ticks, newTicks, tickInfosFromContract);
 
     // Not really a good place to do it, but in order to save RPC requests,
@@ -315,8 +315,6 @@ export class KsElasticEventPool extends StatefulEventSubscriber<PoolState> {
     if (_poolState.locked == false || _poolState.locked == undefined) {
       isValid = true;
     }
-    console.log('isValid', isValid);
-
     const tickList = new Array<TickInfo>(newTicks.length);
     this.setTickList(tickList, newTicks, tickInfosFromContract);
     return <PoolState>{

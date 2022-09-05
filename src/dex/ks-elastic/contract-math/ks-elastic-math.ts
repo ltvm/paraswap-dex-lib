@@ -414,8 +414,6 @@ class KsElasticMath {
           exactInput,
           zeroForOne,
         );
-      console.log('sqrtPriceNextX96.sqrtPriceNextX96', step.sqrtPriceNextX96);
-      console.log('sqrtPriceNextX96.sqrtPriceNextX96', step.sqrtPriceNextX96);
       state.amountSpecifiedRemaining =
         state.amountSpecifiedRemaining - step.amountIn;
       state.amountCalculated = state.amountCalculated + step.amountOut;

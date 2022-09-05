@@ -134,8 +134,6 @@ export class SwapMath {
         const denominator =
           TWO_BPS * sqrtRatioCurrentX96 -
           bigIntify(feePips) * sqrtRatioTargetX96;
-        console.log('denominator', denominator);
-        console.log('denominator sqrtRatioCurrentX96', sqrtRatioCurrentX96);
 
         let numerator = denominator - bigIntify(feePips) * sqrtRatioCurrentX96;
         numerator = FullMath.mulDiv(

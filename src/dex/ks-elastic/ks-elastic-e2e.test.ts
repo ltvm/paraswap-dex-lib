@@ -7,13 +7,11 @@ import {
   Holders,
   NativeTokenSymbols,
 } from '../../../tests/constants-e2e';
-import {
-  Network,
-  ProviderURL,
-  ContractMethod,
-  SwapSide,
-} from '../../constants';
+import { Network, ContractMethod, SwapSide } from '../../constants';
 import { StaticJsonRpcProvider } from '@ethersproject/providers';
+import { generateConfig } from '../../config';
+
+jest.setTimeout(1000 * 60 * 3);
 
 /*
   README
@@ -61,7 +59,10 @@ describe('KsElastic E2E', () => {
     const network = Network.MAINNET;
     const tokens = Tokens[network];
     const holders = Holders[network];
-    const provider = new StaticJsonRpcProvider(ProviderURL[network], network);
+    const provider = new StaticJsonRpcProvider(
+      generateConfig(network).privateHttpProvider,
+      network,
+    );
 
     const tokenASymbol: string = 'USDT';
     const tokenBSymbol: string = 'WETH';
@@ -102,32 +103,32 @@ describe('KsElastic E2E', () => {
               provider,
             );
           });
-          // it(`${network} ${side} ${contractMethod} ${tokenASymbol} -> ${nativeTokenSymbol}`, async () => {
-          //   await testE2E(
-          //     tokens[tokenASymbol],
-          //     tokens[nativeTokenSymbol],
-          //     holders[tokenASymbol],
-          //     side === SwapSide.SELL ? tokenAAmount: nativeTokenAmount,
-          //     side,
-          //     dexKey,
-          //     contractMethod,
-          //     network,
-          //     provider,
-          //   );
-          // });
-          // it(`${network} ${side} ${contractMethod} ${tokenASymbol} -> ${tokenBSymbol}`, async () => {
-          //   await testE2E(
-          //     tokens[tokenASymbol],
-          //     tokens[tokenBSymbol],
-          //     holders[tokenASymbol],
-          //     side === SwapSide.SELL ? tokenAAmount: tokenBAmount,
-          //     side,
-          //     dexKey,
-          //     contractMethod,
-          //     network,
-          //     provider,
-          //   );
-          // });
+          it(`${network} ${side} ${contractMethod} ${tokenASymbol} -> ${nativeTokenSymbol}`, async () => {
+            await testE2E(
+              tokens[tokenASymbol],
+              tokens[nativeTokenSymbol],
+              holders[tokenASymbol],
+              side === SwapSide.SELL ? tokenAAmount : nativeTokenAmount,
+              side,
+              dexKey,
+              contractMethod,
+              network,
+              provider,
+            );
+          });
+          it(`${network} ${side} ${contractMethod} ${tokenASymbol} -> ${tokenBSymbol}`, async () => {
+            await testE2E(
+              tokens[tokenASymbol],
+              tokens[tokenBSymbol],
+              holders[tokenASymbol],
+              side === SwapSide.SELL ? tokenAAmount : tokenBAmount,
+              side,
+              dexKey,
+              contractMethod,
+              network,
+              provider,
+            );
+          });
         });
       }),
     );

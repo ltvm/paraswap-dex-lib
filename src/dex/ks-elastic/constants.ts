@@ -67,3 +67,6 @@ const TICK_SPACING = {
 };
 
 export const TickSpacing = TICK_SPACING;
+
+export const PoolAddressNotExisted =
+  '0x0000000000000000000000000000000000000000';

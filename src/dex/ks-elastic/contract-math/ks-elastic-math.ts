@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { PoolState, Slot0, TickInfo } from '../types';
+import { PoolState, TickInfo } from '../types';
 import { LiquidityMath } from './LiquidityMath';
 import { ZERO } from '../internal-constants';
 import { SqrtPriceMath } from './SqrtPriceMath';

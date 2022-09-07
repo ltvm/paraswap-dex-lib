@@ -111,9 +111,9 @@ export class SwapMath {
           TWO_BPS * sqrtRatioTargetX96 -
           bigIntify(feePips) * sqrtRatioCurrentX96;
         const numerator = FullMath.mulDiv(
-          bigIntify(liquidity),
-          bigIntify(TWO_BPS * absPriceDiff),
-          bigIntify(denominator),
+          liquidity,
+          TWO_BPS * absPriceDiff,
+          denominator,
         );
         reachAmount = FullMath.mulDiv(numerator, Q96, sqrtRatioCurrentX96);
       } else {
@@ -136,33 +136,18 @@ export class SwapMath {
           bigIntify(feePips) * sqrtRatioTargetX96;
 
         let numerator = denominator - bigIntify(feePips) * sqrtRatioCurrentX96;
-        numerator = FullMath.mulDiv(
-          bigIntify(bigIntify(liquidity) << 96n),
-          bigIntify(numerator),
-          bigIntify(denominator),
-        );
+        numerator = FullMath.mulDiv(liquidity << 96n, numerator, denominator);
         reachAmount =
-          FullMath.mulDiv(
-            bigIntify(numerator),
-            bigIntify(absPriceDiff),
-            sqrtRatioCurrentX96,
-          ) / sqrtRatioTargetX96;
+          FullMath.mulDiv(numerator, absPriceDiff, sqrtRatioCurrentX96) /
+          sqrtRatioTargetX96;
         reachAmount = -reachAmount;
       } else {
         const denominator =
           TWO_BPS * sqrtRatioTargetX96 -
           bigIntify(feePips) * sqrtRatioCurrentX96;
         let numerator = denominator - bigIntify(feePips) * sqrtRatioTargetX96;
-        numerator = FullMath.mulDiv(
-          bigIntify(liquidity),
-          bigIntify(numerator),
-          bigIntify(denominator),
-        );
-        reachAmount = FullMath.mulDiv(
-          bigIntify(numerator),
-          bigIntify(absPriceDiff),
-          bigIntify(Q96),
-        );
+        numerator = FullMath.mulDiv(liquidity, numerator, denominator);
+        reachAmount = FullMath.mulDiv(numerator, absPriceDiff, Q96);
         reachAmount = -reachAmount;
       }
     }
@@ -183,36 +168,24 @@ export class SwapMath {
         returnedAmount =
           FullMath.mulDivRoundingUp(deltaL, sqrtRatioTargetX96, Q96) +
           FullMath.mulDiv(
-            bigIntify(liquidity),
-            bigIntify(sqrtRatioCurrentX96 - sqrtRatioTargetX96),
-            bigIntify(Q96),
+            liquidity,
+            sqrtRatioCurrentX96 - sqrtRatioTargetX96,
+            Q96,
           ) *
             BigInt(-1);
       } else {
         returnedAmount =
+          FullMath.mulDivRoundingUp(deltaL, sqrtRatioTargetX96, Q96) +
           FullMath.mulDivRoundingUp(
-            bigIntify(deltaL),
-            bigIntify(sqrtRatioTargetX96),
-            bigIntify(Q96),
-          ) +
-          FullMath.mulDivRoundingUp(
-            bigIntify(liquidity),
-            bigIntify(sqrtRatioTargetX96 - sqrtRatioCurrentX96),
-            bigIntify(Q96),
+            liquidity,
+            sqrtRatioTargetX96 - sqrtRatioCurrentX96,
+            Q96,
           );
       }
     } else {
       returnedAmount =
-        FullMath.mulDivRoundingUp(
-          bigIntify(liquidity + deltaL),
-          bigIntify(Q96),
-          bigIntify(sqrtRatioTargetX96),
-        ) +
-        FullMath.mulDivRoundingUp(
-          bigIntify(liquidity),
-          bigIntify(Q96),
-          bigIntify(sqrtRatioCurrentX96),
-        ) *
+        FullMath.mulDivRoundingUp(liquidity + deltaL, Q96, sqrtRatioTargetX96) +
+        FullMath.mulDivRoundingUp(liquidity, Q96, sqrtRatioCurrentX96) *
           BigInt(-1);
     }
 
@@ -278,7 +251,7 @@ export class SwapMath {
       // ax^2 - 2bx + c = 0 such that b > 0, and x denotes deltaL
       let a = fee;
       let b = BPS - fee;
-      let c = BigInt(fee) * BigInt(liquidity) * BigInt(absAmount);
+      let c = fee * liquidity * absAmount;
       if (zeroForOne) {
         b = b - FullMath.mulDiv(BPS * absAmount, sqrtRatioCurrentX96, Q96);
         c = FullMath.mulDiv(c, sqrtRatioCurrentX96, Q96);
@@ -303,15 +276,15 @@ export class SwapMath {
       let tmp = FullMath.mulDiv(absAmount, sqrtRatioCurrentX96, Q96);
       if (exactIn) {
         return FullMath.mulDivRoundingUp(
-          bigIntify(liquidity + deltaL),
-          bigIntify(sqrtRatioCurrentX96),
-          bigIntify(liquidity + tmp),
+          liquidity + deltaL,
+          sqrtRatioCurrentX96,
+          liquidity + tmp,
         );
       } else {
         return FullMath.mulDiv(
-          bigIntify(bigIntify(liquidity) + bigIntify(deltaL)),
-          bigIntify(sqrtRatioCurrentX96),
-          bigIntify(bigIntify(liquidity) - bigIntify(tmp)),
+          liquidity + deltaL,
+          sqrtRatioCurrentX96,
+          liquidity - tmp,
         );
       }
     } else {

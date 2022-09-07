@@ -43,6 +43,7 @@ import { DeepReadonly } from 'ts-essentials';
 import { ksElasticMath } from './contract-math/ks-elastic-math';
 import { resolve } from 'path';
 import { Data } from '../aave-v3/types';
+import { PoolNotFoundError } from './errors';
 
 export class KsElastic
   extends SimpleExchange
@@ -142,7 +143,7 @@ export class KsElastic
           blockNumber,
         );
       } catch (e) {
-        if (e instanceof Error && e.message.endsWith('Pool does not exist')) {
+        if (e instanceof PoolNotFoundError) {
           // Pool does not exist for this feeCode, so we can set it to null
           // to prevent more requests for this pool
           pool = null;

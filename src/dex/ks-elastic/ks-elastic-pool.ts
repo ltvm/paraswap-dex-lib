@@ -18,6 +18,8 @@ import MultiCallABI from '../../abi/ks-elastic/Multicall.json';
 import { bigIntify } from '../../utils';
 import { ksElasticMath } from './contract-math/ks-elastic-math';
 import { NumberAsString } from 'paraswap-core';
+import { PoolAddressNotExisted } from './constants';
+import { PoolNotFoundError } from './errors';
 import {
   OUT_OF_RANGE_ERROR_POSTFIX,
   FeeAmount,
@@ -208,6 +210,9 @@ export class KsElasticEventPool extends StatefulEventSubscriber<PoolState> {
       const poolAddress = await this.poolFactoryContract.methods[
         getPoolData.funcName
       ](...getPoolData.params).call();
+      if (poolAddress === PoolAddressNotExisted) {
+        throw new PoolNotFoundError(this.token0, this.token1, this.fee);
+      }
       this.poolAddress = poolAddress;
       return new this.dexHelper.web3Provider.eth.Contract(
         PoolInstanceABI as AbiItem[],
@@ -325,8 +330,8 @@ export class KsElasticEventPool extends StatefulEventSubscriber<PoolState> {
       tickList,
       ticks,
       isValid,
-      currentTick: currentTick,
-      reinvestLiquidity: _liquidityState.reinvestL,
+      currentTick: bigIntify(currentTick),
+      reinvestLiquidity: bigIntify(_liquidityState.reinvestL),
     };
   }
 

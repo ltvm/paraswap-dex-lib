@@ -12,15 +12,6 @@ export type TickInfo = {
   index: number;
 };
 
-export type Slot0 = {
-  sqrtPriceX96: bigint;
-  tick: bigint;
-  observationIndex: number;
-  observationCardinality: number;
-  observationCardinalityNext: number;
-  feeProtocol: bigint;
-};
-
 export type PoolState = {
   tickSpacing: bigint;
   fee: FeeAmount;
